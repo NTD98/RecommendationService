@@ -1,0 +1,16 @@
+kraft:
+  enabled: true
+
+controller:
+  replicaCount: 3
+
+broker:
+  replicaCount: 3
+
+listeners:
+  client:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT
