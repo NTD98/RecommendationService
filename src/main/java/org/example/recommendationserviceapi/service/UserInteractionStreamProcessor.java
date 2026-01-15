@@ -4,6 +4,7 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
+import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
@@ -20,17 +21,23 @@ import java.util.Map;
 
 @Service
 public class UserInteractionStreamProcessor {
+    private static final ObjectMapper jsonMapper = new ObjectMapper();
 
     public void process() throws Exception {
         // 1. Set up the Flink Execution Environment
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+        // Enable Checkpointing to guarantee Exactly-Once semantics and Fault Tolerance
+        env.enableCheckpointing(10000); // Checkpoint every 10 seconds
+        env.getCheckpointConfig().setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE);
+        env.getCheckpointConfig().setCheckpointStorage("file:///tmp/flink-checkpoints");
 
         // 2. Configure the Kafka Source (The input pipe)
         KafkaSource<String> source = KafkaSource.<String>builder()
                 .setBootstrapServers("localhost:9094,localhost:9095,localhost:9096")
                 .setTopics("movie-clicks")
                 .setGroupId("flink-recommender-group")
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
@@ -40,8 +47,7 @@ public class UserInteractionStreamProcessor {
         stream
                 // A. Map: Convert JSON String -> UserInteraction Object
                 .map(value -> {
-                    ObjectMapper jsonParser = new ObjectMapper();
-                    return jsonParser.readValue(value, UserInteraction.class);
+                    return jsonMapper.readValue(value, UserInteraction.class);
                 })
 
                 // B. KeyBy: Group streams by User ID

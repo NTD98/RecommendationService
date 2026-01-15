@@ -23,6 +23,20 @@ This project implements a real-time recommendation engine service. It collects u
 4. **Output**: 
    - The system outputs the user's top genre for that window.
 
+## Architecture Diagram
+
+```mermaid
+graph LR
+    Client([Client]) -- POST /click --> Controller[ReceiveInteractionEventController]
+    Controller -- Produce --> Kafka[(Kafka: movie-clicks)]
+    Kafka -- Consume --> Flink[UserInteractionStreamProcessor]
+    subgraph Flink Job
+        Flink -- KeyBy UserId --> Window[Tumbling Window 10s]
+        Window -- Aggregate --> TopGenre[Calculate Top Genre]
+    end
+    TopGenre --> Output[Output Result]
+```
+
 ## API Endpoints
 
 ### Track User Interaction
