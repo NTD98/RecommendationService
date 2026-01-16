@@ -34,7 +34,7 @@ graph LR
     Controller -- Produce --> Kafka[(Kafka: movie-clicks)]
     Kafka -- Consume --> Flink[UserInteractionStreamProcessor]
     subgraph Flink Job
-        Flink -- KeyBy UserId --> Window[Tumbling Window 30d]
+        Flink -- KeyBy UserId --> Window[Tumbling Window 10s]
         Window -- Aggregate --> Logic[Calculate Genre Counts]
     end
     Logic -- Update/Create --> RedisCluster
