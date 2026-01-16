@@ -6,7 +6,7 @@ This project implements a real-time recommendation engine service. It collects u
 
 - **Real-time Data Processing**: Uses Apache Flink to process user interaction streams in real-time.
 - **User Interaction Tracking**: Captures events like clicks and searches via a REST API.
-- **Aggregation**: Aggregates user data over time windows (e.g., 30 days) to determine user preferences (e.g., favorite genre).
+- **Aggregation**: Aggregates user data over time windows (e.g., 10 seconds) to determine user preferences (e.g., favorite genre).
 - **Kafka Integration**: Consumes interaction events from a Kafka topic (`movie-clicks`).
 - **Redis Cluster Storage**: Stores and updates user preference leaderboards (Sorted Sets) in a 6-node Redis Cluster (3 Masters, 3 Replicas) for high availability and low latency.
 
@@ -19,7 +19,7 @@ This project implements a real-time recommendation engine service. It collects u
    - The `UserInteractionStreamProcessor` (Flink Job) consumes these events from Kafka.
 3. **Aggregation**: 
    - Events are grouped by User ID.
-   - A tumbling window (30 days) aggregates the data.
+   - A tumbling window (10 seconds) aggregates the data.
    - The system calculates genre counts within that window.
 4. **Storage**: 
    - The system updates a **Sorted Set** in the Redis Cluster for each user (`user_genres:{userId}`).
