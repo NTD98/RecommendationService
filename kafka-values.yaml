@@ -1,5 +1,6 @@
 kraft:
   enabled: true
+  clusterId: MkU3OEVBNTcwNTJENDM2Qk
 
 controller:
   replicaCount: 3
@@ -14,3 +15,20 @@ listeners:
     protocol: PLAINTEXT
   interbroker:
     protocol: PLAINTEXT
+  external:
+    protocol: PLAINTEXT
+
+externalAccess:
+  enabled: true
+  controller:
+    enabled: false
+    service:
+      type: ClusterIP
+      domain: localhost
+  broker:
+    service:
+      type: LoadBalancer
+      ports:
+        external: 9094
+  autoDiscovery:
+    enabled: true
