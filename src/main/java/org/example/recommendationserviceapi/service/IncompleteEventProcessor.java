@@ -1,5 +1,6 @@
 package org.example.recommendationserviceapi.service;
 
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.modulith.events.IncompleteEventPublications;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ public class IncompleteEventProcessor {
     }
 
     @Scheduled(fixedRate = 1, timeUnit = TimeUnit.MINUTES)
+    @SchedulerLock(name = "reprocessIncompleteEvents", lockAtLeastFor = "30s", lockAtMostFor = "5m")
     public void reprocessIncompleteEvents() {
         incompleteEvents.resubmitIncompletePublicationsOlderThan(Duration.ofMinutes(1));
     }
